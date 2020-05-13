@@ -39,6 +39,7 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
   knn.cl.df$cl.to.total = to.size[as.character(knn.cl.df$cl.to)]
   knn.cl.df = knn.cl.df[knn.cl.df$Freq > 0,]
   knn.cl.df$pval.log = knn.cl.df$odds  = 0
+  
   for(i in 1:nrow(knn.cl.df)){
     q = knn.cl.df$Freq[i] - 1
     k = knn.cl.df$cl.from.total[i]
@@ -50,6 +51,8 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
   knn.cl.df$frac = knn.cl.df$Freq/knn.cl.df$cl.from.total
   knn.cl.df$cl.from.label = cl.df[as.character(knn.cl.df$cl.from),"cluster_label"]
   knn.cl.df$cl.to.label = cl.df[as.character(knn.cl.df$cl.to),"cluster_label"]
+  
+  
   return(list(knn.result=knn.result, pred.result=pred.result, knn.cl.df=knn.cl.df))
 }
 
