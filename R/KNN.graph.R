@@ -417,8 +417,8 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
   
   
   ####plot edges
-  p.edges <- ggplot(poly.Edges, aes(group=Group))+geom_polygon(aes(x=x, y=y), alpha=0.2)
-  p.edges <- p.edges  + theme_void()
+  #p.edges <- ggplot(poly.Edges, aes(group=Group))+geom_polygon(aes(x=x, y=y), alpha=0.2)
+  #p.edges <- p.edges  + theme_void()
   #p.edges
   
   if (!is.null(plot.hull)) {
