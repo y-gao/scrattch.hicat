@@ -75,7 +75,8 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
 #' @param plot.width 
 #' @param label.size 
 #' @param max_size 
-#' 
+#' @node_trans options are the same as ggplot2 options for scale_size_area trans; "asn", "atanh", "boxcox", "date", "exp", "hms", "identity", "log", "log10", "log1p", "log2", "logit", "modulus", "probability", "probit", "pseudo_log", "reciprocal", "reverse", "sqrt" and "time". When no trans needed choose "identity", if large variability in cluster_size "sqrt" is a good choice.
+#'
 #' @example_data:
 #'  
 #' knn.cl.df <- read.csv("data/Constellation_example/knn.cl.df.csv")
@@ -437,7 +438,7 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
                      y=y, 
                      size=cluster_size, 
                      color=cluster_color)) +
-      scale_size_area(trans="sqrt",
+      scale_size_area(trans=node_trans,
                       max_size=max_size,
                       breaks = c(100,1000,10000,100000)) +
       scale_color_identity() + 
@@ -467,7 +468,7 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
                      y=y, 
                      size=cluster_size, 
                      color=cluster_color)) +
-      scale_size_area(trans="sqrt",
+      scale_size_area(trans=node_trans,
                       max_size=max_size,
                       breaks = c(100,1000,10000,100000)) +
       scale_color_identity() + 
@@ -506,9 +507,9 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
                    y=y, 
                    size=cluster_size, 
                    color=cluster_color)) +
-    scale_size_area(trans="sqrt",
+    scale_size_area(trans=node_trans,
                     max_size=max_size,
-                    breaks = c(100,1000,10000,100000)) +
+                    breaks = c(10,100,1000,10000,100000)) +
     scale_color_identity() + 
     geom_text(data=nodes,
               aes(x=x, 
