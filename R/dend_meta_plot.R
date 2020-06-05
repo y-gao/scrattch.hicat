@@ -1,7 +1,7 @@
 #' dend_meta_plot
 #' 
 #' 
-#' @param anno Sample annotations. The first column should be sample_name, and each annotation should have \_id, \_label, and \_color columns
+#' @param anno Sample annotations. The first column should be sample_name, and each annotation should have \_id, \_label, and \_color columns. Requires cluster_id which needs to be sequential in order of the dendrogram.
 #' @param dend Dendrogram object. 
 #' @param section_wedges Default is NULL. Use annotation to separate  Can be used to generate lines between sections to divide leaves of dendrogram, e.g. separating subclass, class. 
 #' @param bar_variables base name of variables to be represented as bargraphs below dendrogram. Annotation variables need to be represented as \_id, \_label, \_color in anno.
@@ -19,11 +19,11 @@
 #'    
 
 ## to remove later ##
-load("//allen/programs/celltypes/workgroups/mct-t200/Manuscript/2019_Yao/common/dend.rda")
-load("//allen/programs/celltypes/workgroups/mct-t200/Manuscript/2019_Yao/common/anno.df.rda")
+#load("//allen/programs/celltypes/workgroups/mct-t200/Manuscript/2019_Yao/common/dend.rda")
+#load("//allen/programs/celltypes/workgroups/mct-t200/Manuscript/2019_Yao/common/anno.df.rda")
 
-load("//allen/programs/celltypes/workgroups/rnaseqanalysis/shiny/facs_seq/mouse_TH_20190513/dend.rda")
-load("//allen/programs/celltypes/workgroups/rnaseqanalysis/shiny/facs_seq/mouse_TH_20190513/anno.df.rda")
+#load("//allen/programs/celltypes/workgroups/rnaseqanalysis/shiny/facs_seq/mouse_TH_20190513/dend.rda")
+#load("//allen/programs/celltypes/workgroups/rnaseqanalysis/shiny/facs_seq/mouse_TH_20190513/anno.df.rda")
 
 
 
