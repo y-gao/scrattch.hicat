@@ -3,17 +3,17 @@
 #' 
 #' @param anno Sample annotations. The first column should be sample_name, and each annotation should have \_id, \_label, and \_color columns
 #' @param dend Dendrogram object. 
-#' @param section_wedges Default is NULL. Use _id to separate  Can be used to generate lines between sections to divide leaves of dendrogram, e.g. separating subclass, class. 
+#' @param section_wedges Default is NULL. Use annotation to separate  Can be used to generate lines between sections to divide leaves of dendrogram, e.g. separating subclass, class. 
 #' @param bar_variables base name of variables to be represented as bargraphs below dendrogram. Annotation variables need to be represented as \_id, \_label, \_color in anno.
-#' @param nr_rect plotting of cluster size below dend. Default is TRUE.
+#' @param nr_hist plotting of cluster size below dend. Default is TRUE.
 #' @param return_type What values to return - can be "plot", "data", or "both". Default is "plot".
 #' @example_data:
 #'  
-#' knn.cl.df <- read.csv("data/Constellation_example/knn.cl.df.csv")
-#' cl.center.df <- read.csv("data/Constellation_example/cl.center.df.csv", row.names=1)
+#' load("data/dend_meta_example/dend.rda")
+#' load("data/dend_meta_example/anno.df.rda")
 #' 
 #' 
-#' @usage dend_meta_plot <- plot_constellation()
+#' @usage dend_meta_plot <- plot_dend_meta(anno=anno.df, dend=dend, section_wedges="class", bar_variables=c("region", "gender", "batch"), nr_hist=TRUE)
 #' 
 #'  
 #'    
@@ -27,11 +27,11 @@ load("//allen/programs/celltypes/workgroups/rnaseqanalysis/shiny/facs_seq/mouse_
 
 
 
-dend_meta_plot <- function(anno,
+plot_dend_meta <- function(anno,
                            dend,
                            section_wedges=NULL,
                            bar_variables=NULL,
-                           nr_rect=TRUE,
+                           nr_hist=TRUE,
                            panel_width=0.2
                            ) {
   
@@ -55,8 +55,9 @@ dend_meta_plot <- function(anno,
   
   
   if(!is.null(section_wedges)){
+    var_wedge <- paste0(section_wedges,"_id")
     sections <- anno %>%
-    group_by_at(section_wedges) %>%
+    group_by_at(var_wedge) %>%
     summarise(x = min(cluster_id - 0.5),
               xend = n_clusters + 0.5)
   
@@ -76,7 +77,7 @@ dend_meta_plot <- function(anno,
   # set padding of initial graph below dend
     offset= panel_pad
     rect.offset= c(rect.offset, offset)
-    panel_width =0.2  
+    panel_width = panel_width 
 
     
   ############
@@ -154,7 +155,7 @@ dend_meta_plot <- function(anno,
     
   offset = offset + panel_width + panel_pad
   rect.offset= c(rect.offset, offset)
-  panel_width_n =2*panel_width
+  panel_width =1.5*panel_width
   }
   
     
@@ -163,25 +164,25 @@ dend_meta_plot <- function(anno,
   # generating cell nr. histogram data
   ############ 
     
-  if(nr_rects=TRUE){
+  if(nr_hist==TRUE){
     n_rects <- anno  %>%
       group_by(cluster_id, cluster_color, cluster_label) %>%
       summarise(n = n()) %>%
       ungroup() %>%
       mutate(adj_n = log10(n)) %>%
-      mutate(f = adj_n/5) %>%
+      mutate(f = adj_n/3) %>%
       mutate(xmin = cluster_id - 0.5,
              xmax = cluster_id + 0.5,
-             ymin = -offset - f  * (2*panel_width),
+             ymin = -offset - f  * panel_width,
              ymax = -offset)
     
     
-    ## still to fix: variable guides representing nr
+    ## still to fix guide labels 
     n_guides <- data.frame(y = seq(-offset - panel_width, -offset, by = 1/5 * panel_width),
                            x = 0.5,
                            xend = n_clusters + 1,
                            label = seq(5, 0, by = -1)) %>%
-      mutate(yend = y)
+              mutate(yend = y)
   
   offset = offset + panel_width + panel_pad*2
   }
@@ -208,28 +209,33 @@ dend_meta_plot <- function(anno,
                      color = col),
                  lineend = "square") 
   
+  
   # different bar plots with metadata
-  lapply(var_rects, function(df) {
-    
-    flat_plot <<- flat_plot + geom_rect(data = df,
-                                       aes(xmin = xmin,
-                                           xmax = xmax,
-                                           ymin = ymin,
-                                           ymax = ymax,
-                                           fill = df[,6]) )
-    
-    } )
+  if(!is.null(bar_variables)) {
+    lapply(var_rects, function(df) {
+      
+      flat_plot <<- flat_plot + geom_rect(data = df,
+                                         aes(xmin = xmin,
+                                             xmax = xmax,
+                                             ymin = ymin,
+                                             ymax = ymax,
+                                             fill = df[,6]) )
+      
+      } )
+    }
   
-  
-  flat_plot <- flat_plot +
-    geom_rect(data = n_rects,
-              aes(xmin = xmin,
-                xmax = xmax,
-                ymin = ymin,
-                ymax = ymax,
-                fill = cluster_color)) +
+  if(nr_hist==TRUE){
+    flat_plot <- flat_plot +
+      geom_rect(data = n_rects,
+                aes(xmin = xmin,
+                  xmax = xmax,
+                  ymin = ymin,
+                  ymax = ymax,
+                  fill = cluster_color)) 
+    }
     
-    # N Cells labels
+  # N Cells labels
+  flat_plot <- flat_plot +  
     geom_text(data = n_guides,
               aes(x = 0,
                   y = y,
@@ -251,23 +257,26 @@ dend_meta_plot <- function(anno,
               angle = 90,
               hjust = 1,
               vjust = 0.3,
-              size = 2) +
+              size = 2) 
+  
+  if(!is.null(section_wedges)){ 
     #Vertical class separators
-    geom_segment(data = wedge_lines,
-                 aes(x = x,
-                     xend = xend,
-                     y = y,
-                     yend = yend)) +
-    # Borders between panels
-    #geom_segment(data = panel_segments,
-    #             aes(x = x, xend = xend,
-    #                 y = y, yend = yend)) +
-    scale_size(range = c(0.5, 1)) +
-    scale_color_identity() +
-    scale_fill_identity() +
-    scale_y_continuous(expand = c(0.25,0)) +
-    scale_x_continuous(limits = c(-1,n_clusters + 1)) +
-    theme_void()
+    flat_plot <- flat_plot +
+      geom_segment(data = wedge_lines,
+                   aes(x = x,
+                       xend = xend,
+                       y = y,
+                       yend = yend)) 
+    
+  }  
+  
+  flat_plot <- flat_plot +
+        scale_size(range = c(0.5, 1)) +
+        scale_color_identity() +
+        scale_fill_identity() +
+        scale_y_continuous(expand = c(0.25,0)) +
+        scale_x_continuous(limits = c(-1,n_clusters + 1)) +
+        theme_void()
   
   
   
