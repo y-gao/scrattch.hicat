@@ -11,8 +11,7 @@
 #' @export
 #'
 #' @examples
-get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac.th=0.5)
-{
+get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac.th=0.5) {
   knn.result = RANN::nn2(rd.dat,k=k)
   row.names(knn.result[[1]]) = row.names(knn.result[[2]])=row.names(rd.dat)
   knn  = knn.result[[1]]
@@ -40,7 +39,7 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
   knn.cl.df = knn.cl.df[knn.cl.df$Freq > 0,]
   knn.cl.df$pval.log = knn.cl.df$odds  = 0
   
-  for(i in 1:nrow(knn.cl.df)){
+  for(i in 1:nrow(knn.cl.df)) {
     q = knn.cl.df$Freq[i] - 1
     k = knn.cl.df$cl.from.total[i]
     m = knn.cl.df$cl.to.total[i]
@@ -48,6 +47,7 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
     knn.cl.df$pval.log[i]=phyper(q, m=m, n=n, k=k, lower.tail = FALSE, log.p=TRUE)
     knn.cl.df$odds[i] = (q + 1) / (k * m /total)
   }
+  
   knn.cl.df$frac = knn.cl.df$Freq/knn.cl.df$cl.from.total
   knn.cl.df$cl.from.label = cl.df[as.character(knn.cl.df$cl.from),"cluster_label"]
   knn.cl.df$cl.to.label = cl.df[as.character(knn.cl.df$cl.to),"cluster_label"]
@@ -86,7 +86,7 @@ get_knn_graph <- function(rd.dat, cl,cl.df, k=15, knn.outlier.th=2, outlier.frac
 #' @usage plotting.MGE.constellation <- plot_constellation(knn.cl.df = knn.cl.df, cl.center.df = cl.center.df, out.dir = "data/Constellation_example/plot", node.dodge=TRUE, plot.hull=c(1,2)) 
 
 
-plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="cluster_id", exxageration=2, curved = TRUE, plot.parts=FALSE, plot.hull = NULL, plot.height=25, plot.width=25, node.dodge=FALSE, label.size=2, max_size=10, node_trans="sqrt") { 
+plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="cluster_id", exxageration=1, curved = TRUE, plot.parts=FALSE, plot.hull = NULL, plot.height=25, plot.width=25, node.dodge=FALSE, label.size=2, max_size=10, node_trans="sqrt") { 
   
   library(gridExtra)
   library(sna)
@@ -103,10 +103,19 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
     dir.create(out.dir)
   }
   
-  #1pt ~= 0.35mm
-  #convertUnit(unit(1, "pt"), "mm", valueOnly=TRUE)
-  #as.numeric(grid::convertX(grid::unit(1, "points"), "mm"))
-  conv.fact <- as.numeric(grid::convertX(grid::unit(1, "points"), "native"))
+  # 1pt ~= 0.35mm
+  # Ver. 4
+  # If your axes are length 20 and below, conversion factor will be: 
+  if (max(cl.center.df$x) <= 20 & max(cl.center.df$y) <= 20) {
+    
+    conv.fact <- grid::convertX(grid::unit(0.42, "points"), "mm", valueOnly = TRUE)
+    
+    # If axes are particularly large, conversion factor will scale to this:
+  } else if (max(cl.center.df$x) >= 50 & max(cl.center.df$y) >= 50) {
+    
+    conv.fact <- grid::convertX(grid::unit(1.5, "points"), "mm", valueOnly = TRUE)
+  }
+  
   ## when grid::unitType() becomes available set units before start
   
   
@@ -153,7 +162,7 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
   
   ###==== extract node size/stroke width to replot later without scaling
   g <- ggplot_build(p.nodes)
-  dots <-g[["data"]][[1]] #dataframe with geom_point size, color, coords
+  dots <- g[["data"]][[1]] #dataframe with geom_point size, color, coords
   
   nodes <- left_join(cl.center.df, dots, by=c("x","y"))
   
@@ -257,7 +266,7 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
   knn.cl.d$cl.to <- as.numeric(as.character(knn.cl.d$cl.to))
   
   knn.cl.d <- left_join(knn.cl.d, select(nodes, cl, node.width), by=c("cl.from"="cl"))
-  colnames(knn.cl.d)[colnames(knn.cl.d)=="node.width"]<- "node.pt.from"
+  colnames(knn.cl.d)[colnames(knn.cl.d)=="node.width"] <- "node.pt.from"
   knn.cl.d$node.pt.to <- ""
   knn.cl.d$Freq.to <- ""
   knn.cl.d$frac.to <- ""
@@ -327,9 +336,9 @@ plot_constellation <- function(knn.cl.df, cl.center.df, out.dir, node.label="clu
   line.segments$line.width.to <- line.segments$node.size.to*line.segments$frac.to
   
   ##max fraction to max point size 
-  line.segments$line.width.from<- (line.segments$frac.from/max(line.segments$frac.from, line.segments$frac.to))*line.segments$node.size.from
+  line.segments$line.width.from <- (line.segments$frac.from/max(line.segments$frac.from, line.segments$frac.to))*line.segments$node.size.from
   
-  line.segments$line.width.to<- (line.segments$frac.to/max(line.segments$frac.from, line.segments$frac.to))*line.segments$node.size.to
+  line.segments$line.width.to <- (line.segments$frac.to/max(line.segments$frac.from, line.segments$frac.to))*line.segments$node.size.to
   
   
   ###=== create edges, exaggerated width
