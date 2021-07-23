@@ -25,6 +25,7 @@ Once these dependencies are installed, `scrattch.hicat` can be installed with:
 devtools::install_github("AllenInstitute/scrattch.hicat")
 ```
 
+
 ## Vignettes
 
 [An overview of the main functions in `scrattch.hicat`](http://htmlpreview.github.io/?https://github.com/AllenInstitute/scrattch.hicat/blob/master/vignettes/scrattch.hicat_release.html)  
