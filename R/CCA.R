@@ -22,6 +22,8 @@ CanonCor <- function(mat1, mat2, standardize = TRUE, k = 20) {
 
 
 
+
+
 ##Extract from Seurat Package
 #' CCA
 #'
